@@ -31,86 +31,199 @@ const ALL_VOCAB = [...ACTION_VOCAB, ...DIRECTION_VOCAB];
 // Dynamic Question Generators (100 questions each)
 const generateVocabQuestions = () => Array.from({ length: 100 }, (_, i) => {
   const answer = ACTION_VOCAB[Math.floor(Math.random() * ACTION_VOCAB.length)];
-  const optionsSet = new Set([answer.word]);
-  while(optionsSet.size < 4) {
-    optionsSet.add(ACTION_VOCAB[Math.floor(Math.random() * ACTION_VOCAB.length)].word);
+  const type = Math.floor(Math.random() * 3);
+  
+  let optionsSet = new Set<string>();
+  let options: string[] = [];
+  let qText = '';
+  let displayText = null;
+  let emoji = null;
+
+  if (type === 0) {
+    qText = "Look and select the word.";
+    emoji = answer.emoji;
+    optionsSet.add(answer.word);
+    while(optionsSet.size < 4) optionsSet.add(ACTION_VOCAB[Math.floor(Math.random() * ACTION_VOCAB.length)].word);
+    options = Array.from(optionsSet).sort(() => Math.random() - 0.5);
+  } else if (type === 1) {
+    qText = "Read and select the picture.";
+    displayText = answer.word;
+    optionsSet.add(answer.emoji);
+    while(optionsSet.size < 4) optionsSet.add(ACTION_VOCAB[Math.floor(Math.random() * ACTION_VOCAB.length)].emoji);
+    options = Array.from(optionsSet).sort(() => Math.random() - 0.5);
+  } else {
+    qText = "Listen and select the picture.";
+    emoji = "🔊";
+    optionsSet.add(answer.emoji);
+    while(optionsSet.size < 4) optionsSet.add(ACTION_VOCAB[Math.floor(Math.random() * ACTION_VOCAB.length)].emoji);
+    options = Array.from(optionsSet).sort(() => Math.random() - 0.5);
   }
+
   return {
-    id: i,
-    emoji: answer.emoji,
-    check: null as boolean | null,
-    questionText: `Listen and select the word.`,
-    audioText: answer.word,
-    options: Array.from(optionsSet).sort(() => Math.random() - 0.5),
-    correctOption: answer.word,
+    id: i, emoji, displayText, check: null, questionText: qText, audioText: answer.word,
+    options, correctOption: type === 0 ? answer.word : answer.emoji,
     spanishTranslation: answer.spanish
   };
 });
 
 const generateCanQuestions = () => Array.from({ length: 100 }, (_, i) => {
   const vocab = ACTION_VOCAB[Math.floor(Math.random() * ACTION_VOCAB.length)];
-  const options = [`I can ${vocab.word}.`, `I can't ${vocab.word}.`, `Can you ${vocab.word}?`].sort(() => Math.random() - 0.5);
-  return {
-    id: i,
-    emoji: vocab.emoji,
-    check: true,
-    questionText: `Select the affirmative.`,
-    audioText: `I can ${vocab.word}.`,
-    options,
-    correctOption: `I can ${vocab.word}.`,
-    spanishTranslation: `Yo puedo ${vocab.spanish}.`
-  };
+  const type = Math.floor(Math.random() * 3);
+  
+  let optionsSet = new Set<string>();
+  
+  if (type === 0) { 
+    optionsSet.add(`I can ${vocab.word}.`);
+    while(optionsSet.size < 4) {
+      const v = ACTION_VOCAB[Math.floor(Math.random() * ACTION_VOCAB.length)];
+      optionsSet.add(Math.random() > 0.5 ? `I can ${v.word}.` : `I can't ${v.word}.`);
+    }
+    return {
+       id: i, emoji: vocab.emoji, displayText: null, check: true, questionText: "Select the correct sentence.",
+       audioText: `I can ${vocab.word}.`, options: Array.from(optionsSet).sort(()=>Math.random()-0.5),
+       correctOption: `I can ${vocab.word}.`, spanishTranslation: `Yo puedo ${vocab.spanish}.`
+    };
+  } else if (type === 1) { 
+    const rightOpt = `${vocab.emoji} ✅`;
+    optionsSet.add(rightOpt);
+    while(optionsSet.size < 4) {
+      const v = ACTION_VOCAB[Math.floor(Math.random() * ACTION_VOCAB.length)];
+      optionsSet.add(`${v.emoji} ${Math.random() > 0.5 ? '✅' : '❌'}`);
+    }
+    return {
+       id: i, emoji: null, displayText: `I can ${vocab.word}.`, check: null, questionText: "Read and select the picture.",
+       audioText: `I can ${vocab.word}.`, options: Array.from(optionsSet).sort(()=>Math.random()-0.5),
+       correctOption: rightOpt, spanishTranslation: `Yo puedo ${vocab.spanish}.`
+    };
+  } else { 
+    const rightOpt = `${vocab.emoji} ✅`;
+    optionsSet.add(rightOpt);
+    while(optionsSet.size < 4) {
+      const v = ACTION_VOCAB[Math.floor(Math.random() * ACTION_VOCAB.length)];
+      optionsSet.add(`${v.emoji} ${Math.random() > 0.5 ? '✅' : '❌'}`);
+    }
+    return {
+       id: i, emoji: "🔊", displayText: null, check: null, questionText: "Listen and select the picture.",
+       audioText: `I can ${vocab.word}.`, options: Array.from(optionsSet).sort(()=>Math.random()-0.5),
+       correctOption: rightOpt, spanishTranslation: `Yo puedo ${vocab.spanish}.`
+    };
+  }
 });
 
 const generateCantQuestions = () => Array.from({ length: 100 }, (_, i) => {
   const vocab = ACTION_VOCAB[Math.floor(Math.random() * ACTION_VOCAB.length)];
-  const options = [`I can ${vocab.word}.`, `I can't ${vocab.word}.`, `Can you ${vocab.word}?`].sort(() => Math.random() - 0.5);
-  return {
-    id: i,
-    emoji: vocab.emoji,
-    check: false,
-    questionText: `Select the negative.`,
-    audioText: `I can't ${vocab.word}.`,
-    options,
-    correctOption: `I can't ${vocab.word}.`,
-    spanishTranslation: `Yo no puedo ${vocab.spanish}.`
-  };
+  const type = Math.floor(Math.random() * 3);
+  
+  let optionsSet = new Set<string>();
+  
+  if (type === 0) { 
+    optionsSet.add(`I can't ${vocab.word}.`);
+    while(optionsSet.size < 4) {
+      const v = ACTION_VOCAB[Math.floor(Math.random() * ACTION_VOCAB.length)];
+      optionsSet.add(Math.random() > 0.5 ? `I can ${v.word}.` : `I can't ${v.word}.`);
+    }
+    return {
+       id: i, emoji: vocab.emoji, displayText: null, check: false, questionText: "Select the correct sentence.",
+       audioText: `I can't ${vocab.word}.`, options: Array.from(optionsSet).sort(()=>Math.random()-0.5),
+       correctOption: `I can't ${vocab.word}.`, spanishTranslation: `Yo no puedo ${vocab.spanish}.`
+    };
+  } else if (type === 1) { 
+    const rightOpt = `${vocab.emoji} ❌`;
+    optionsSet.add(rightOpt);
+    while(optionsSet.size < 4) {
+      const v = ACTION_VOCAB[Math.floor(Math.random() * ACTION_VOCAB.length)];
+      optionsSet.add(`${v.emoji} ${Math.random() > 0.5 ? '✅' : '❌'}`);
+    }
+    return {
+       id: i, emoji: null, displayText: `I can't ${vocab.word}.`, check: null, questionText: "Read and select the picture.",
+       audioText: `I can't ${vocab.word}.`, options: Array.from(optionsSet).sort(()=>Math.random()-0.5),
+       correctOption: rightOpt, spanishTranslation: `Yo no puedo ${vocab.spanish}.`
+    };
+  } else { 
+    const rightOpt = `${vocab.emoji} ❌`;
+    optionsSet.add(rightOpt);
+    while(optionsSet.size < 4) {
+      const v = ACTION_VOCAB[Math.floor(Math.random() * ACTION_VOCAB.length)];
+      optionsSet.add(`${v.emoji} ${Math.random() > 0.5 ? '✅' : '❌'}`);
+    }
+    return {
+       id: i, emoji: "🔊", displayText: null, check: null, questionText: "Listen and select the picture.",
+       audioText: `I can't ${vocab.word}.`, options: Array.from(optionsSet).sort(()=>Math.random()-0.5),
+       correctOption: rightOpt, spanishTranslation: `Yo no puedo ${vocab.spanish}.`
+    };
+  }
 });
 
 const generateCanYouQuestions = () => Array.from({ length: 100 }, (_, i) => {
   const vocab = ACTION_VOCAB[Math.floor(Math.random() * ACTION_VOCAB.length)];
-  const answer = Math.random() > 0.5;
-  return {
-    id: i,
-    emoji: vocab.emoji,
-    check: null as boolean | null,
-    questionText: `Can you ${vocab.word}?`,
-    audioText: `Can you ${vocab.word}?`,
-    options: ['Yes, I can.', 'No, I can\'t.'],
-    correctOption: answer ? 'Yes, I can.' : 'No, I can\'t.',
-    spanishTranslation: `¿Puedes tú ${vocab.spanish}?`
-  };
+  const canDoIt = Math.random() > 0.5;
+  const type = Math.floor(Math.random() * 2);
+
+  if (type === 0) {
+    return {
+      id: i, emoji: vocab.emoji, displayText: null, check: canDoIt, questionText: `Can you ${vocab.word}?`,
+      audioText: `Can you ${vocab.word}?`,
+      options: ["Yes, I can.", "No, I can't."],
+      correctOption: canDoIt ? "Yes, I can." : "No, I can't.",
+      spanishTranslation: `¿Puedes ${vocab.spanish}?`
+    };
+  } else {
+    const targetAns = canDoIt ? "Yes, I can." : "No, I can't.";
+    let optionsSet = new Set([`Can you ${vocab.word}?`]);
+    while(optionsSet.size < 3) {
+       const v = ACTION_VOCAB[Math.floor(Math.random() * ACTION_VOCAB.length)];
+       optionsSet.add(`Can you ${v.word}?`);
+    }
+    return {
+      id: i, emoji: vocab.emoji, displayText: null, check: canDoIt, questionText: `What is the question for: "${targetAns}"?`,
+      audioText: targetAns,
+      options: Array.from(optionsSet).sort(()=>Math.random()-0.5),
+      correctOption: `Can you ${vocab.word}?`,
+      spanishTranslation: `Respuesta: ${canDoIt ? 'Sí puedo' : 'No puedo'} (${vocab.spanish})`
+    }
+  }
 });
 
 const generateDirectionSequences = () => Array.from({ length: 100 }, (_, i) => {
-  const isHorizontal = Math.random() > 0.5;
-  const subset = isHorizontal ? [DIRECTION_VOCAB[2], DIRECTION_VOCAB[3]] : [DIRECTION_VOCAB[0], DIRECTION_VOCAB[1]];
-  const seqItems = Array.from({ length: 3 }, () => subset[Math.floor(Math.random() * subset.length)]);
-  const nextItem = subset[Math.floor(Math.random() * subset.length)];
-  
-  const optionsSet = new Set([nextItem.emoji]);
-  while(optionsSet.size < 3) {
-    optionsSet.add(DIRECTION_VOCAB[Math.floor(Math.random() * DIRECTION_VOCAB.length)].emoji);
+  const type = Math.floor(Math.random() * 3);
+  if (type === 0) {
+    const isHorizontal = Math.random() > 0.5;
+    const subset = isHorizontal ? [DIRECTION_VOCAB[2], DIRECTION_VOCAB[3]] : [DIRECTION_VOCAB[0], DIRECTION_VOCAB[1]];
+    const seqItems = Array.from({ length: 3 }, () => subset[Math.floor(Math.random() * subset.length)]);
+    const nextItem = subset[Math.floor(Math.random() * subset.length)];
+    
+    const optionsSet = new Set([nextItem.emoji]);
+    while(optionsSet.size < 3) optionsSet.add(DIRECTION_VOCAB[Math.floor(Math.random() * DIRECTION_VOCAB.length)].emoji);
+    
+    return {
+      id: i, emoji: null, displayText: seqItems.map(x => x.emoji).join(' ') + ' ❓', check: null,
+      questionText: "What comes next?",
+      audioText: "What comes next?",
+      options: Array.from(optionsSet).sort(()=>Math.random()-0.5),
+      correctOption: nextItem.emoji,
+      spanishTranslation: seqItems.map(x=>x.spanish).join(', ') + `, ¿qué sigue?`
+    };
+  } else if (type === 1) {
+    const vocab = DIRECTION_VOCAB[Math.floor(Math.random() * DIRECTION_VOCAB.length)];
+    const optionsSet = new Set([vocab.emoji]);
+    while(optionsSet.size < 4) optionsSet.add(DIRECTION_VOCAB[Math.floor(Math.random() * DIRECTION_VOCAB.length)].emoji);
+    
+    return {
+       id: i, emoji: '🔊', displayText: null, check: null, questionText: "Listen and select the arrow.",
+       audioText: vocab.word, options: Array.from(optionsSet).sort(()=>Math.random()-0.5),
+       correctOption: vocab.emoji, spanishTranslation: vocab.spanish
+    }
+  } else {
+    const vocab = DIRECTION_VOCAB[Math.floor(Math.random() * DIRECTION_VOCAB.length)];
+    const optionsSet = new Set([vocab.word]);
+    while(optionsSet.size < 4) optionsSet.add(DIRECTION_VOCAB[Math.floor(Math.random() * DIRECTION_VOCAB.length)].word);
+    
+    return {
+       id: i, emoji: vocab.emoji, displayText: null, check: null, questionText: "Look and select the word.",
+       audioText: vocab.word, options: Array.from(optionsSet).sort(()=>Math.random()-0.5),
+       correctOption: vocab.word, spanishTranslation: vocab.spanish
+    }
   }
-  
-  return {
-    id: i,
-    seq: seqItems.map(x => x.emoji),
-    next: nextItem.emoji,
-    options: Array.from(optionsSet).sort(() => Math.random() - 0.5),
-    audioText: seqItems.map(x => x.word).join(', ') + `, what's next?`,
-    spanishTranslation: seqItems.map(x => x.spanish).join(', ') + `, ¿qué sigue?`
-  };
 });
 
 const playSound = (type: 'correct' | 'incorrect') => {
@@ -318,7 +431,7 @@ export default function App() {
       )}
 
       {currentView === 'robot_directions' && (
-        <SequenceQuizView
+        <QuizView
           header={renderHeader('Robot Directions', true)} 
           speak={speak} 
           onCorrect={handleCorrect}
@@ -441,8 +554,17 @@ function QuizView({ header, speak, onCorrect, onIncorrect, streak, questions }: 
           </div>
 
           <div className="relative mb-6">
-            <div className="text-[100px] md:text-[140px] bg-sky-50 p-6 rounded-[40px] shadow-inner leading-none w-48 h-48 md:w-56 md:h-56 flex items-center justify-center">{q.emoji}</div>
-            {q.check !== null && (
+            {q.displayText && (
+              <div className="text-4xl md:text-5xl font-bold bg-sky-50 p-6 md:p-8 rounded-[40px] shadow-inner text-sky-800 text-center min-w-[200px] flex items-center justify-center leading-tight">
+                {q.displayText}
+              </div>
+            )}
+            {q.emoji && (
+              <div className="text-[100px] md:text-[140px] bg-sky-50 p-6 rounded-[40px] shadow-inner leading-none w-48 h-48 md:w-56 md:h-56 flex items-center justify-center">
+                {q.emoji}
+              </div>
+            )}
+            {q.check !== null && q.check !== undefined && (
               <div className={`absolute -bottom-4 -right-4 p-3 rounded-full text-white shadow-xl border-4 border-white ${q.check ? 'bg-emerald-500' : 'bg-red-500'}`}>
                 {q.check ? <CheckCircle2 size={40} /> : <XCircle size={40} />}
               </div>
@@ -457,16 +579,19 @@ function QuizView({ header, speak, onCorrect, onIncorrect, streak, questions }: 
           </div>
           
           <div className="w-full flex flex-col sm:flex-row flex-wrap justify-center gap-4">
-            {q.options.map((opt: string, idx: number) => (
-              <button 
-                key={idx}
-                onClick={() => handleSelect(opt)}
-                disabled={feedback !== null}
-                className="flex-[1_1_40%] min-w-[150px] bg-sky-500 text-white text-xl md:text-2xl font-bold py-5 px-4 rounded-2xl shadow-md hover:bg-sky-600 transition-all hover:scale-105 active:scale-95 disabled:opacity-50"
-              >
-                {opt}
-              </button>
-            ))}
+            {q.options.map((opt: string, idx: number) => {
+              const isLargeEmoji = !/[a-zA-Z]/.test(opt);
+              return (
+                <button 
+                  key={idx}
+                  onClick={() => handleSelect(opt)}
+                  disabled={feedback !== null}
+                  className={`flex-[1_1_40%] min-w-[150px] bg-sky-500 text-white font-bold py-5 px-4 rounded-2xl shadow-md hover:bg-sky-600 transition-all hover:scale-105 active:scale-95 disabled:opacity-50 ${isLargeEmoji ? 'text-5xl md:text-6xl' : 'text-xl md:text-2xl'}`}
+                >
+                  {opt}
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -508,140 +633,5 @@ function QuizView({ header, speak, onCorrect, onIncorrect, streak, questions }: 
   );
 }
 
-function SequenceQuizView({ header, speak, onCorrect, onIncorrect, streak, questions }: any) {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [feedback, setFeedback] = useState<'correct' | 'incorrect' | null>(null);
-  const [showSpanish, setShowSpanish] = useState(false);
 
-  const q = questions[currentIndex];
-
-  useEffect(() => {
-    if (q && !feedback) {
-      speak(q.audioText);
-    }
-    setShowSpanish(false);
-  }, [currentIndex, q, speak, feedback]);
-
-  if (!q) {
-    return (
-      <div className="flex flex-col flex-1">
-        {header}
-        <div className="flex-1 flex flex-col items-center justify-center p-8">
-          <div className="text-8xl mb-6">🤖</div>
-          <h2 className="text-3xl font-bold text-indigo-800 text-center">Robot says: Well done!</h2>
-        </div>
-      </div>
-    );
-  }
-
-  const handleSelect = (option: string) => {
-    if (option === q.next) {
-      setFeedback('correct');
-      playSound('correct');
-      confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
-      const messages = ["Correct!", "Robot says YES!", "Perfect!"];
-      speak(messages[Math.floor(Math.random() * messages.length)]);
-      onCorrect();
-      setTimeout(() => {
-        setFeedback(null);
-        setCurrentIndex(i => i + 1);
-      }, 2000);
-    } else {
-      setFeedback('incorrect');
-      playSound('incorrect');
-      onIncorrect();
-      speak("Robot says try again!");
-      setTimeout(() => {
-        setFeedback(null);
-      }, 1500);
-    }
-  };
-
-  return (
-    <div className="flex flex-col flex-1 relative">
-      {header}
-      <div className="flex-1 w-full max-w-4xl mx-auto p-4 flex flex-col items-center justify-center">
-        
-        <div className="bg-white rounded-3xl p-6 md:p-12 shadow-xl border border-indigo-100 w-full flex flex-col items-center">
-          
-          <div className="w-full flex justify-between items-start mb-4">
-             <button onClick={() => setShowSpanish(s => !s)} className="flex items-center gap-2 bg-slate-100 text-slate-600 px-4 py-2 rounded-full font-semibold hover:bg-slate-200 transition">
-                <Eye size={18} /> {showSpanish ? 'Hide' : 'Show in Spanish'}
-             </button>
-             
-             <button onClick={() => speak(q.audioText)} className="bg-amber-400 p-3 md:p-4 rounded-full text-white hover:bg-amber-500 hover:scale-105 active:scale-95 transition shadow-md">
-               <Volume2 size={32} />
-             </button>
-          </div>
-
-          <div className="text-center mb-8 min-h-[80px]">
-             <h2 className="text-2xl md:text-3xl font-bold text-indigo-800 flex items-center justify-center gap-3">
-                 <span>🤖</span> What comes next?
-             </h2>
-             {showSpanish && (
-               <p className="text-xl md:text-2xl font-bold text-pink-500 mt-2 bg-pink-50 px-4 py-2 rounded-xl inline-block">{q.spanishTranslation}</p>
-             )}
-          </div>
-          
-          <div className="flex gap-4 md:gap-6 items-center flex-wrap justify-center mb-10 bg-indigo-50 p-6 md:p-8 rounded-[40px] shadow-inner">
-            {q.seq.map((emoji: string, idx: number) => (
-              <div key={idx} className="text-5xl md:text-7xl w-16 h-16 md:w-24 md:h-24 flex items-center justify-center bg-white rounded-2xl shadow-sm">
-                {emoji}
-              </div>
-            ))}
-            <div className="text-4xl md:text-6xl text-indigo-300 font-bold ml-2 w-16 h-16 md:w-24 md:h-24 flex items-center justify-center bg-indigo-100 rounded-2xl border-4 border-dashed border-indigo-200">
-              ?
-            </div>
-          </div>
-
-          <div className="flex gap-4 w-full justify-center">
-             {q.options.map((opt: string, idx: number) => (
-               <button 
-                 key={idx}
-                 onClick={() => handleSelect(opt)}
-                 disabled={feedback !== null}
-                 className="flex-1 max-w-[120px] md:max-w-[150px] aspect-square text-5xl md:text-7xl bg-indigo-500 text-white rounded-3xl shadow-lg hover:bg-indigo-600 transition-all hover:scale-105 active:scale-95 disabled:opacity-50 flex items-center justify-center"
-               >
-                 {opt}
-               </button>
-             ))}
-          </div>
-
-        </div>
-      </div>
-
-      <AnimatePresence>
-        {feedback && (
-          <motion.div 
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="absolute inset-0 z-50 flex items-center justify-center bg-white/70 backdrop-blur-sm"
-          >
-            {feedback === 'correct' ? (
-              <motion.div 
-                initial={{ scale: 0.5, rotate: 15 }}
-                animate={{ scale: 1, rotate: 0 }}
-                transition={{ type: 'spring', bounce: 0.6, duration: 0.8 }}
-                className="p-8 md:p-12 rounded-[40px] shadow-2xl flex flex-col items-center justify-center gap-4 bg-emerald-500 text-white relative overflow-hidden"
-              >
-                 <motion.div animate={{ rotate: -360 }} transition={{ duration: 0.5 }}><CheckCircle2 size={100} /></motion.div>
-                 <span className="text-4xl font-extrabold tracking-wide text-center">Correct!</span>
-                 {streak >= 2 && <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.3 }} className="text-emerald-100 font-bold text-2xl">+2 Stars Combo!</motion.span>}
-              </motion.div>
-            ) : (
-              <motion.div 
-                initial={{ x: 20 }}
-                animate={{ x: [0, 20, -20, 20, -20, 0] }}
-                transition={{ duration: 0.4 }}
-                className="p-8 md:p-12 rounded-[40px] shadow-2xl flex flex-col items-center justify-center gap-4 bg-red-500 text-white"
-              >
-                 <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 0.4 }}><XCircle size={100} /></motion.div>
-                 <span className="text-4xl font-extrabold tracking-wide text-center">Oops!</span>
-              </motion.div>
-            )}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
 
