@@ -1,0 +1,6 @@
+{
+  "name": "Active English: Unit 6",
+  "description": "Interactive English practice focusing on action verbs, abilities (can/can't), and directions based on Unit 6 concepts.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
